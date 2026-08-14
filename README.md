@@ -2,6 +2,7 @@
 
 A scroll-driven thermal receipt printer UI component for React.
 
+[![npm](https://img.shields.io/npm/v/@intframe/thermal-receipt.svg)](https://www.npmjs.com/package/@intframe/thermal-receipt)
 [![CI](https://github.com/intframe/thermal-receipt/actions/workflows/ci.yml/badge.svg)](https://github.com/intframe/thermal-receipt/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 

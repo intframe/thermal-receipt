@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/intframe/thermal-receipt"
+    "url": "git+https://github.com/intframe/thermal-receipt.git"
   },
   "homepage": "https://github.com/intframe/thermal-receipt#readme",
   "keywords": [
