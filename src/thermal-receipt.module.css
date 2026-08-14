@@ -1,0 +1,512 @@
+/* thermal-receipt styles. The whole effect is paper, ink and machine physics:
+   thermal develop is a CSS color transition, the feed is a stepped height,
+   and every phase change is driven by the [data-phase] attribute on the root. */
+
+.sec {
+  position: relative;
+  background: #eae7df;
+  color: #16150f;
+}
+
+/* Self-driven scroll mode: tall section with a sticky, viewport-high stage. */
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* Controlled mode: the component simply fills its parent. */
+.sec[data-mode="controlled"] {
+  height: 100%;
+}
+
+.sec[data-mode="controlled"] .stage {
+  position: relative;
+  height: 100%;
+}
+
+/* ── Printing rig ── */
+
+.rig {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  top: 0;
+  width: 440px;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* Idle paper sway: a subtle swing pivoting at the slot, until tear-off. */
+.paperSway {
+  position: absolute;
+  left: 50%;
+  bottom: calc(9vh + 118px);
+  width: 336px;
+  margin-left: -168px;
+  transform-origin: bottom center;
+  animation: sway 8s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes sway {
+  from { transform: rotate(0.5deg); }
+  to { transform: rotate(-0.5deg); }
+}
+
+/* Cursor spring tilt lives on its own axis so it never fights
+   the sway keyframes or the tear-off transition. */
+.paperTilt {
+  transform-origin: bottom center;
+  will-change: transform;
+}
+
+.paper {
+  position: absolute;
+  bottom: -16px; /* tucked slightly behind the printer's top edge */
+  left: 0;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(180deg, rgba(20, 18, 10, 0.016) 0 2px, transparent 2px 5px),
+    linear-gradient(90deg, #f2f0e8 0%, #fbfaf4 8%, #fdfcf8 50%, #fbfaf4 92%, #f0eee6 100%);
+  box-shadow:
+    0 12px 30px rgba(24, 22, 12, 0.16),
+    0 2px 8px rgba(24, 22, 12, 0.1);
+  transition: transform 1.1s cubic-bezier(0.45, 0, 0.9, 0.4), opacity 0.9s ease 0.3s;
+}
+
+/* Tear-off: the receipt drops away, rotating as it falls. */
+.sec[data-phase="tear"] .paper,
+.sec[data-phase="out"] .paper {
+  transform: translate(26px, 56vh) rotate(8deg);
+  opacity: 0;
+}
+
+.sec[data-phase="tear"] .paperSway,
+.sec[data-phase="out"] .paperSway {
+  animation: none;
+}
+
+.paperIn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 26px 26px 30px;
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+/* Thermal develop: a freshly fed line starts pale, then darkens to ink. */
+.paperIn > * {
+  color: #b7b2a2;
+  transition: color 0.55s ease, transform 0.25s ease;
+}
+
+/* Printed lines respond to touch. */
+@media (hover: hover) {
+  .paperIn > *[data-on="1"]:hover {
+    color: #000;
+    transform: translateX(4px);
+  }
+}
+
+.paperIn > *[data-on="1"] {
+  color: #17150e;
+}
+
+.paperShade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(24, 22, 12, 0.07) 0%, transparent 7%, transparent 93%, rgba(24, 22, 12, 0.09) 100%);
+}
+
+/* ── Receipt typography ── */
+
+.lLogo {
+  font-family: inherit;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.lC {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  margin: 3px 0;
+}
+
+.lRule {
+  border-top: 1.5px dashed currentColor;
+  opacity: 0.55;
+  margin: 12px 0;
+}
+
+.lKv {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 3px 0;
+}
+
+.lKv span { letter-spacing: 0.06em; }
+
+.lKv i {
+  flex: 1;
+  border-bottom: 2px dotted currentColor;
+  opacity: 0.45;
+  transform: translateY(-3px);
+}
+
+.lKv b { font-weight: 700; letter-spacing: 0.08em; }
+
+.lBig {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  margin: 5px 0;
+}
+
+/* Inverted box: the em background follows the line's develop color
+   (currentColor) while the inner span stays paper-colored. */
+.lBig em {
+  font-style: normal;
+  background: currentColor;
+  padding: 0 4px;
+}
+
+.lBig em span {
+  color: #fbfaf4;
+}
+
+.lSub {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin: 2px 0 8px 24px;
+  opacity: 0.92;
+}
+
+/* ── Total + stamp ── */
+
+.totWrap { position: relative; }
+
+.lTotal {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.lTotal i {
+  flex: 1;
+  border-bottom: 2px dotted currentColor;
+  opacity: 0.45;
+  transform: translateY(-3px);
+}
+
+/* The stamp waits oversized and invisible, then slams down to scale(1)
+   with a back-out ease when the phase flips to "stamp". */
+.stamp {
+  position: absolute;
+  right: -6px;
+  top: -26px;
+  padding: 10px 14px 9px;
+  border: 2.5px solid #2b45f5;
+  border-radius: 6px;
+  outline: 1.5px solid #2b45f5;
+  outline-offset: 3px;
+  color: #2b45f5;
+  text-align: center;
+  transform: rotate(-11deg) scale(1.7);
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: transform 0.35s cubic-bezier(0.2, 1.6, 0.4, 1), opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.stamp b {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.stamp em {
+  display: block;
+  font-style: normal;
+  font-size: 7.5px;
+  letter-spacing: 0.22em;
+  margin-top: 3px;
+}
+
+.sec[data-phase="stamp"] .stamp,
+.sec[data-phase="tear"] .stamp,
+.sec[data-phase="out"] .stamp {
+  transform: rotate(-11deg) scale(1);
+  opacity: 0.92;
+}
+
+/* ── Barcode ── */
+
+.barcode {
+  height: 34px;
+  margin: 10px 18px 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    currentColor 0 2px, transparent 2px 4px,
+    currentColor 4px 5px, transparent 5px 9px,
+    currentColor 9px 12px, transparent 12px 14px,
+    currentColor 14px 15px, transparent 15px 19px,
+    currentColor 19px 22px, transparent 22px 23px,
+    currentColor 23px 24px, transparent 24px 28px
+  );
+}
+
+/* ── Printer ── */
+
+.printer {
+  position: absolute;
+  left: 50%;
+  bottom: 9vh;
+  width: 400px;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.slotBack {
+  position: absolute;
+  left: 6%;
+  top: -6px;
+  width: 88%;
+  height: 14px;
+  border-radius: 7px;
+  background: #b9b5aa;
+}
+
+.pbody {
+  position: relative;
+  height: 128px;
+  border-radius: 16px 16px 20px 20px;
+  background: linear-gradient(180deg, #f6f4ee 0%, #e7e4db 46%, #d9d5ca 100%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -2px 6px rgba(24, 22, 12, 0.08),
+    0 1px 2px rgba(24, 22, 12, 0.18);
+}
+
+/* The body vibrates half a pixel while printing. */
+.sec[data-phase="print"] .pbody {
+  animation: runShake 0.09s steps(2) infinite;
+}
+
+@keyframes runShake {
+  from { transform: translateY(0); }
+  to { transform: translateY(0.5px); }
+}
+
+.slot {
+  position: absolute;
+  left: 8%;
+  top: 12px;
+  width: 84%;
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #2a281f 0%, #4a463a 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Fresh paper stub left in the slot after tear-off, with a serrated edge. */
+.stub {
+  position: absolute;
+  left: 3%;
+  top: 2px;
+  width: 94%;
+  height: 7px;
+  background: #fbfaf4;
+  clip-path: polygon(0 100%, 0 40%, 2% 0, 4% 40%, 6% 0, 8% 40%, 10% 0, 12% 40%, 14% 0, 16% 40%, 18% 0, 20% 40%, 22% 0, 24% 40%, 26% 0, 28% 40%, 30% 0, 32% 40%, 34% 0, 36% 40%, 38% 0, 40% 40%, 42% 0, 44% 40%, 46% 0, 48% 40%, 50% 0, 52% 40%, 54% 0, 56% 40%, 58% 0, 60% 40%, 62% 0, 64% 40%, 66% 0, 68% 40%, 70% 0, 72% 40%, 74% 0, 76% 40%, 78% 0, 80% 40%, 82% 0, 84% 40%, 86% 0, 88% 40%, 90% 0, 92% 40%, 94% 0, 96% 40%, 98% 0, 100% 40%, 100% 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease 0.5s;
+}
+
+.sec[data-phase="tear"] .stub,
+.sec[data-phase="out"] .stub {
+  opacity: 1;
+}
+
+.pface {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 16px;
+  height: 52px;
+}
+
+.led {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3ec97e;
+  box-shadow: 0 0 8px rgba(62, 201, 126, 0.8);
+  animation: ledIdle 2.6s ease-in-out infinite;
+}
+
+.sec[data-phase="print"] .led {
+  animation: ledRun 0.35s steps(2) infinite;
+}
+
+@keyframes ledIdle {
+  0%, 84%, 100% { opacity: 1; }
+  92% { opacity: 0.25; }
+}
+
+@keyframes ledRun {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
+
+.lcd {
+  position: absolute;
+  left: 22px;
+  top: 0;
+  padding: 4px 10px 3px;
+  min-width: 148px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #1d211a, #2a3125);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.65);
+  color: #9fe8b4;
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.plabel {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.24em;
+  color: #8f8b7f;
+}
+
+.grill {
+  position: absolute;
+  right: 0;
+  top: 4px;
+  width: 64px;
+  height: 40px;
+  background: radial-gradient(circle at 2px 2px, rgba(24, 22, 12, 0.24) 1.1px, transparent 1.6px) 0 0 / 8px 8px;
+  border-radius: 4px;
+}
+
+.pshadow {
+  position: absolute;
+  left: 2%;
+  bottom: -12px;
+  width: 96%;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(24, 22, 12, 0.3), transparent 70%);
+}
+
+/* ── Desk line + outro ── */
+
+.deskline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(9vh - 1px);
+  height: 1px;
+  background: rgba(24, 22, 12, 0.14);
+  z-index: 1;
+}
+
+.outro {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, 16px);
+  z-index: 3;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.45s, transform 0.7s ease 0.45s;
+  pointer-events: none;
+}
+
+.sec[data-phase="out"] .outro {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.outro p {
+  font-size: clamp(26px, 2.6vw, 40px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.outro em {
+  display: block;
+  font-style: normal;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6d6a5e;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 860px) {
+  .rig {
+    width: 320px;
+  }
+
+  .paperSway {
+    width: 272px;
+    margin-left: -136px;
+    bottom: calc(7vh + 100px);
+  }
+
+  .paperIn {
+    padding: 20px 18px 24px;
+    font-size: 10.5px;
+  }
+
+  .lBig { font-size: 12.5px; }
+  .lLogo { font-size: 18px; }
+
+  .printer {
+    width: 320px;
+    bottom: 7vh;
+  }
+
+  .pbody { height: 108px; }
+
+  .deskline { bottom: calc(7vh - 1px); }
+
+  .outro {
+    top: 30%;
+    width: 86vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paperSway, .led { animation: none !important; }
+  .sec[data-phase="print"] .pbody { animation: none; }
+  .paper, .stamp, .outro { transition-duration: 0.01ms; }
+}
