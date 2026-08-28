@@ -20,6 +20,8 @@ No animation libraries. No dependencies beyond React. Scroll progress is compute
 - **Stamp slam**: a rubber stamp scales down onto the total with a back-out ease at 80% progress
 - **Tear-off finale**: the receipt drops away, a serrated paper stub remains in the slot, and an optional outro fades in
 - **Two drive modes**: self-driven (it owns a scroll section) or controlled (you pass `progress` from 0 to 1)
+
+  Self-driven mode reads the section's position against the **window** viewport, so it only tracks correctly when the page itself is the scroller. Inside an `overflow: auto` box that is not the document scroller, drive it yourself with `progress` (see [discussion #1](https://github.com/intframe/thermal-receipt/discussions/1) for a copy-paste container hook).
 - **Cursor tilt** (optional): the paper leans slightly toward the pointer on fine-pointer devices
 - **Respects `prefers-reduced-motion`**: renders the fully printed receipt without animation
 - **Zero dependencies**: React 18/19 peer dependency only, styles ship as a plain CSS file
