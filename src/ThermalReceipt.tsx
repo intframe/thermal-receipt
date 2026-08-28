@@ -128,7 +128,18 @@ export default function ThermalReceipt({
     };
     measure();
     if (document.fonts?.ready) document.fonts.ready.then(measure).catch(() => {});
-    addEventListener("resize", measure);
+
+    /* Re-measure on any layout change, not only a window resize. A sidebar opening
+       beside the receipt re-wraps the lines and grows `inner.offsetHeight` while the
+       window stays put, which would otherwise leave `bottoms` and `totalH` stale and
+       stop the paper short of the last line. */
+    let ro: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(measure);
+      ro.observe(inner);
+    } else {
+      addEventListener("resize", measure);
+    }
 
     let smooth = reduced ? 1 : 0;
     let lastPhase = "";
@@ -213,7 +224,8 @@ export default function ThermalReceipt({
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      removeEventListener("resize", measure);
+      if (ro) ro.disconnect();
+      else removeEventListener("resize", measure);
       if (fine) removeEventListener("pointermove", onMove);
     };
   }, [lines, controlled, cursorTilt]);
